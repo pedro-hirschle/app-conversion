@@ -10,14 +10,14 @@ st.title('Cálculo da regulação do transformador')
 st.markdown('A regulação do transformador é uma medida que indica a variação percentual na tensão secundária de um transformador quando ele passa da condição de vazio (sem carga) para a condição de carga nominal.')
 
 with st.form(key='input_form'):
-    st.subheader('Insira os Parâmetros do Transformador e da Carga')
-    
-    s_transformador = st.number_input('Potência Nominal do Transformador (kVA)', min_value=1.0, value=200.0, step=1.0)
-    v_primario = st.number_input('Tensão Nominal Primária (kV)', min_value=0.1, value=20.0, step=0.1)
+    st.subheader('Insira os Parâmetros do Transformador')
+    # s_transformador = st.number_input('Potência Nominal do Transformador (kVA)', min_value=1.0, value=200.0, step=1.0) #! opcional
+    # v_primario = st.number_input('Tensão Nominal Primária (kV)', min_value=0.1, value=20.0, step=0.1) # ! opcional
     v_secundario = st.number_input('Tensão Nominal Secundária (kV)', min_value=0.1, value=2.4, step=0.1)
     z_eq_real = st.number_input('Resistência Equivalente (Ohms)', min_value=0.0, value=0.28, step=0.01)
     z_eq_imag = st.number_input('Reatância Equivalente (Ohms)', min_value=0.0, value=1.0, step=0.01)
     
+    st.subheader('Insira os Parâmetros da Carga')
     s_carga = st.number_input('Potência da Carga (kVA)', min_value=1.0, value=180.0, step=1.0)
     fp_carga = st.number_input('Fator de Potência da Carga (0 a 1)', min_value=0.0, max_value=1.0, value=1.0, step=0.01)
     
@@ -25,7 +25,7 @@ with st.form(key='input_form'):
 
 if submit_button or st.session_state['transformer_challenge']:
     st.session_state['transformer_challenge'] = True
-    st.session_state['s_transformador'], st.session_state['v_primario'], st.session_state['v_secundario'] = s_transformador, v_primario, v_secundario
+    st.session_state['v_secundario'] = v_secundario
     st.session_state['z_eq_real'], st.session_state['z_eq_imag'], st.session_state['s_carga'], st.session_state['fp_carga'] = z_eq_real, z_eq_imag, s_carga, fp_carga
 
     st.divider()
@@ -56,7 +56,9 @@ if submit_button or st.session_state['transformer_challenge']:
 
     st.subheader('Resultado da Regulação do Transformador')
     st.write(f'**Regulação do Transformador:** {regulacao:.2f}%')
-    if regulacao < 1:
+    if regulacao < 0:
+        st.warning("**Atenção:** A regulação do transformador é negativa! Isso indica que a tensão sob carga é maior do que a tensão nominal sem carga. Essa condição pode causar problemas em equipamentos conectados e não é desejável para a operação segura do sistema. Recomenda-se revisar a carga conectada e as condições de operação.")
+    elif regulacao < 1:
         st.success("**Avaliação:** Excelente. O transformador mantém a tensão praticamente constante sob carga.")
     elif 1 <= regulacao < 3:
         st.success("**Avaliação:** Muito Bom. A variação de tensão é quase imperceptível para a maioria das aplicações.")
